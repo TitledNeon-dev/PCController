@@ -1,6 +1,6 @@
 # PCController ⚡ Peak Performance Edition
 
-Ультрабыстрый движок автоматизации, компьютерного зрения и аппаратного восприятия Windows для ИИ-ассистентов (Claude, Antigravity, Cursor, Cline и локальных LLM).
+Ультрабыстрый движок автоматизации, компьютерного зрения и аппаратного восприятия Windows для ИИ-ассистентов (Claude, Antigravity, Cursor, Cline и локальных LLM) через протокол **Model Context Protocol (MCP)**.
 
 ---
 
@@ -10,7 +10,7 @@
 | :--- | :--- | :--- | :--- |
 | **Мышь (Перемещение)** | Win32 `SetCursorPos` | **0.02 мс** | Мгновенное позиционирование без искусственных задержек |
 | **Мышь (Клик)** | Win32 `mouse_event` | **0.05 мс** | Прямой клик в ядро Windows |
-| **Клавиатура** | Batch `SendInput` (Unicode) | **~5–8 мс** на фразу | Ввод всей строки за один вызов ядра, полная поддержка русского языка |
+| **Клавиатура** | Batch `SendInput` (Unicode) | **~5–8 мс** на фразу | Ввод всей строки за один вызов ядра, полная поддержка русского языка и эмодзи |
 | **Скриншот экрана** | MSS + OpenCV C++ JPEG | **~35–40 мс** | Нулевое копирование памяти, размер 1080p ~120 КБ |
 | **Vision для мультимодальных ИИ** | In-Memory JPEG Stream | **~35 мс** | Возврат нативного `Image` в MCP без записи на диск |
 | **Компьютерное зрение** | OpenCV `matchTemplate` | **~90 мс** | Поиск иконки/кнопки на экране и клик по координатам |
@@ -19,30 +19,47 @@
 
 ---
 
-## 🛠️ Набор инструментов MCP-сервера (25 Tools)
+## 📦 Установка
+
+```powershell
+# 1. Клонируйте репозиторий
+git clone https://github.com/TitledNeon-dev/PCController.git
+cd PCController
+
+# 2. Создайте и активируйте виртуальное окружение
+python -m venv .venv
+.\.venv\Scripts\activate
+
+# 3. Установите зависимости
+pip install -r requirements.txt
+```
+
+---
+
+## 🛠️ Набор инструментов MCP-сервера (26 Tools)
 
 ### 1. Системный статус
-- `get_system_info`: Срез состояния ПК (разрешение, координаты мыши, активное окно, число окон).
-- `get_screen_size`: Разрешение основного монитора.
+- `get_system_info`: Полный срез состояния ПК (разрешение, координаты мыши, активное окно, число окон).
+- `get_screen_size`: Разрешение основного монитора в пикселях.
 
 ### 2. Зрение и Скриншоты
-- `take_screenshot`: Сверхбыстрый скриншот в файл (JPEG/PNG, настройка качества и масштаба).
+- `take_screenshot`: Сверхбыстрый скриншот в файл JPEG/PNG с настройкой качества и масштаба.
 - `capture_screen_vision`: Нативный мультимодальный блок `Image` прямо в контекст ИИ.
 - `find_image_on_screen`: Поиск шаблона (кнопки, иконки) на экране через OpenCV.
 - `click_image`: Поиск шаблона и моментальный клик по нему в одно действие.
 
 ### 3. Мышь
 - `get_mouse_position`: Координаты курсора в реальном времени.
-- `mouse_move`: Перемещение курсора.
-- `mouse_click`: Клик любой кнопкой (left/right/middle, двойной клик).
+- `mouse_move`: Перемещение курсора (мгновенное или с анимацией).
+- `mouse_click`: Клик любой кнопкой (left/right/middle, одиночный или двойной).
 - `mouse_drag`: Перетаскивание объектов.
-- `mouse_scroll`: Прокрутка колесиком мыши.
+- `mouse_scroll`: Прокрутка колесиком мыши вверх/вниз.
 
 ### 4. Клавиатура и Буфер обмена
-- `keyboard_type`: Мгновенный ввод Unicode-текста любой длины.
+- `keyboard_type`: Мгновенный пакетный ввод Unicode-текста любой длины.
 - `keyboard_press`: Нажатие одиночной клавиши (`enter`, `esc`, `tab`, `win` и др.).
 - `keyboard_hotkey`: Горячие клавиши (`ctrl+c`, `alt+tab` и др.) с гарантированным сбросом модификаторов.
-- `clipboard_get` / `clipboard_set`: Чтение и запись в буфер обмена.
+- `clipboard_get` / `clipboard_set`: Чтение и запись в системный буфер обмена.
 
 ### 5. Окна и Процессы
 - `list_windows`: Список всех видимых окон с их координатами.
@@ -51,18 +68,19 @@
 - `minimize_window`: Сворачивание окна.
 - `close_window`: Корректное закрытие окна (`WM_CLOSE`).
 - `wait_for_window`: Умное ожидание появления окна по ключевому слову.
-- `launch_app`: Запуск любой программы Windows с опциональным ожиданием ее окна.
+- `launch_app`: Асинхронный запуск программы Windows с опциональным ожиданием ее окна.
 
 ### 6. Аппаратное восприятие
-- `capture_webcam`: Снимок с веб-камеры с прогревом матрицы.
+- `get_media_devices`: Обнаружение подключенных микрофонов и веб-камер.
+- `capture_webcam`: Снимок с веб-камеры с автоматическим прогревом матрицы.
 - `record_mic`: Запись звука с микрофона с расчетом пиковой амплитуды и детекцией голоса.
 
 ---
 
-## 🧪 Запуск единого теста и бенчмарка
+## 🧪 Запуск бенчмарка
 
 ```powershell
-.venv\Scripts\python.exe benchmark.py
+python benchmark.py
 ```
 
 ---
@@ -71,7 +89,7 @@
 
 ### Вариант 1: stdio (Claude Desktop, Cursor, Cline, Antigravity)
 ```powershell
-.venv\Scripts\python.exe server.py
+python server.py
 ```
 
 Конфигурация в `claude_desktop_config.json`:
@@ -79,9 +97,9 @@
 {
   "mcpServers": {
     "pc-controller": {
-      "command": "C:\\Users\\nz809\\PycharmProjects\\PCController\\.venv\\Scripts\\python.exe",
+      "command": "python",
       "args": [
-        "C:\\Users\\nz809\\PycharmProjects\\PCController\\server.py"
+        "C:\\path\\to\\PCController\\server.py"
       ]
     }
   }
@@ -90,5 +108,11 @@
 
 ### Вариант 2: HTTP SSE (порт 8000)
 ```powershell
-.venv\Scripts\python.exe server.py --transport sse --port 8000
+python server.py --transport sse --port 8000
 ```
+
+---
+
+## 📄 Лицензия
+
+Проект распространяется под лицензией [MIT](LICENSE).
